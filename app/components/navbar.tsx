@@ -28,16 +28,22 @@ export function Navbar() {
             >
               <button className="button-main">{user.name}</button>
               {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                <div className="absolute right-0  w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
                   <Link
                     href="/profile"
                     className="block px-4 py-2 hover:bg-gray-100 w-full text-left"
                   >
                     Profile
                   </Link>
+                  <Link
+                    href="/friends"
+                    className="block px-4 py-2 hover:bg-gray-100 w-full text-left"
+                  >
+                    Friends
+                  </Link>
                   <button
                     onClick={() => signOut()}
-                    className="block px-4 py-2 hover:bg-gray-100 w-full text-left text-red-600"
+                    className="block px-4 py-2 hover:bg-gray-100 w-full text-left text-red-600 cursor-pointer"
                   >
                     Sign Out
                   </button>
@@ -71,6 +77,12 @@ export function Navbar() {
                   className="block px-4 py-2 hover:bg-gray-100 w-full text-left"
                 >
                   {user.name}
+                </Link>
+                <Link
+                    href="/friends"
+                    className="block px-4 py-2 hover:bg-gray-100 w-full text-left"
+                >
+                  Friends
                 </Link>
                 <button
                   onClick={() => signOut()}

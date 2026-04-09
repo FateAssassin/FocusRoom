@@ -5,6 +5,7 @@ import Link from "next/link";
 import Alert from "../components/alert";
 import { signIn } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { Suspense } from "react";
 
 export default function SignInPage() {
 
@@ -60,7 +61,7 @@ export default function SignInPage() {
   };
 
   return (
-    <>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
       {success && <Alert message="Signed in successfully! Redirecting..." type="success" />}
       {error && <Alert message={typeof error === "string" ? error : "Something went wrong"} type="error" />}
       <div className="min-h-screen flex items-center justify-center">
@@ -109,6 +110,6 @@ export default function SignInPage() {
           </form>
         </div>
       </div>
-    </>
+    </Suspense>
   );
 }

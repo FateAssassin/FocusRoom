@@ -41,4 +41,7 @@ yarn-error.log*
 next-env.d.ts
 
 # profile pictures
-/public/profile-pictures
+/public/uploads/profile-pictures/*
+
+# database
+focusroom.db
