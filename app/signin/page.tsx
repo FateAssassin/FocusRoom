@@ -7,61 +7,61 @@ import { signIn } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
 
-export default function SignInPage() {
+export function SignInPageContent() {
 
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const callbackUrl = searchParams.get("callbackUrl") || "/rooms";
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/rooms";
 
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
-    const [success, setSuccess] = useState(false);
-  
-    const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (error) setError("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
-    const errors: string[] = [];
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (error) setError("");
 
-    if (email.trim() === "") {
-      errors.push("error-email");
-    }
-    if (password.trim() === "") {
-      errors.push("error-password");
-    }
-    if (password && password.length < 6) {
-      errors.push("error-length-password");
-    }
+  const errors: string[] = [];
 
-    if (errors.length > 0) {
-      setError(errors.join(","));
-      return;
-    }
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-      callbackUrl,
-    });
+  if (email.trim() === "") {
+    errors.push("error-email");
+  }
+  if (password.trim() === "") {
+    errors.push("error-password");
+  }
+  if (password && password.length < 6) {
+    errors.push("error-length-password");
+  }
 
-    if (!result || result.error) {
-      setError(result?.error || "Invalid credentials");
-      setSuccess(false);
-      return;
-    }
+  if (errors.length > 0) {
+    setError(errors.join(","));
+    return;
+  }
+  const result = await signIn("credentials", {
+    email,
+    password,
+    redirect: false,
+    callbackUrl,
+  });
 
-    setSuccess(true);
-    setError("");
+  if (!result || result.error) {
+    setError(result?.error || "Invalid credentials");
+    setSuccess(false);
+    return;
+  }
 
-    setTimeout(() => {
-      router.push("/rooms");
-      router.refresh();
-    }, 1000);
-  };
+  setSuccess(true);
+  setError("");
+
+  setTimeout(() => {
+    router.push("/rooms");
+    router.refresh();
+  }, 1000);
+};
 
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+    <>
       {success && <Alert message="Signed in successfully! Redirecting..." type="success" />}
       {error && <Alert message={typeof error === "string" ? error : "Something went wrong"} type="error" />}
       <div className="min-h-screen flex items-center justify-center">
@@ -110,6 +110,14 @@ export default function SignInPage() {
           </form>
         </div>
       </div>
+    </>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SignInPageContent />
     </Suspense>
   );
 }
