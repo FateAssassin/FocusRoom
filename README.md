@@ -91,6 +91,7 @@ focusroom.db
 - The rooms feature currently uses in-memory room data, so it is not production-ready.
 - Uploaded profile pictures are stored under `public/uploads/profile-pictures`.
 - Authentication depends on valid environment secrets being set locally.
+- The deployment on Vercel may not work properly yet.
 
 ## Roadmap Direction
 
@@ -105,3 +106,4 @@ Planned improvements include:
 ## License
 
 No license has been added yet.
+
