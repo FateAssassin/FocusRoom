@@ -9,12 +9,24 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "axios": "^1.14.0",
+    "bcrypt": "^6.0.0",
+    "better-sqlite3": "^12.8.0",
+    "bootstrap-icons": "^1.13.1",
+    "fs": "0.0.1-security",
+    "jsonwebtoken": "^9.0.3",
     "next": "16.2.1",
+    "next-auth": "^4.24.13",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^6.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
