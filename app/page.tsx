@@ -1,6 +1,10 @@
+"use client"
+
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 export default function Home() {
+  const { data: session } = useSession();
   const cards = [
     {
       icon: "clock",
@@ -26,15 +30,20 @@ export default function Home() {
 
   return (
     <div className="bg-zinc-50 font-sans">
-      
       <div className="flex flex-col items-center justify-center min-h-[50vh] mt-10 md:mt-20 px-4">
         <h1 className="text-3xl md:text-5xl font-bold mb-6 text-center">Focus Together, Achieve More</h1>
         <p className="text-gray-500 text-lg md:text-xl w-full md:w-1/2 lg:w-1/3 text-center mb-6">
           Join collaborative focus sessions with friends, colleagues, or study partners. Stay accountable with shared Pomodoro timers and real-time presence tracking.
         </p>
-        <Link href="/signin" className="button-main mt-6">
-          Get Started
-        </Link>
+        {session ? (
+          <Link href="/rooms" className="button-main mt-6">
+            Go to Rooms
+          </Link>
+        ) : (
+          <Link href="/signin" className="button-main mt-6">
+            Get Started
+          </Link>
+        )}
       </div>
 
       <div className="flex flex-col bg-gray-200/50 items-center justify-center px-4">
@@ -50,7 +59,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="flex flex-col justify-center items-center min-h-[30vh] mb-10 md:mb-20 mt-20 px-4">
+      <div className="flex flex-col justify-center items-center min-h-[30vh] pb-10 mt-20 px-4">
         <div className="text-center">
           <p className="text-2xl md:text-3xl font-bold mb-4 md:mb-6">
             Ready to focus together?
@@ -58,13 +67,20 @@ export default function Home() {
           <p className="text-gray-500 text-lg md:text-xl mb-6">
             Create or join a room and start your first focus session today.
           </p>
-          <Link href="/signup" className="button-main mb-3 inline-block">
-            Join Now
-          </Link>
-          <br />
-          <Link href="/rooms" className="button-secondary inline-block">
-            Join as Guest
-          </Link>
+          {session ? (
+            <Link href="/rooms" className="button-main mb-3 inline-block">
+              Go to Rooms
+            </Link>
+          ) : (
+            <>
+            <Link href="/signin" className="button-main mb-3 inline-block">
+              Join Now
+            </Link>
+            <br />
+            <Link href="/rooms" className="button-secondary inline-block">
+              Join as Guest
+            </Link></>
+          )}
         </div>
       </div>
     </div>

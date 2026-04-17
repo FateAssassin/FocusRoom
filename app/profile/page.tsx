@@ -4,6 +4,7 @@ import ChangeProfilePicture from "../components/profile/changeProfilePicture";
 import EditDescription from "../components/profile/editDescription";
 import { getUserById } from "../lib/db/users";
 import { redirect } from "next/navigation";
+import Link from "next/dist/client/link";
 
 export default async function ProfilePage() {
     const session = await getServerSession(authOptions);
@@ -46,14 +47,14 @@ export default async function ProfilePage() {
                     {/* Rooms section */}
                     <div>
                         <h2 className="text-xs mt-2 font-semibold uppercase tracking-widest mb-2" style={{ color: "rgb(43, 127, 255)" }}>Rooms</h2>
-                        <div className="rounded-xl p-4 text-gray-400 text-sm italic" style={{ backgroundColor: "rgb(220, 220, 220)" }}>
+                        <div className="rounded-xl p-4 text-gray-400 text-sm italic mb-4" style={{ backgroundColor: "rgb(220, 220, 220)" }}>
                             No rooms yet.
                         </div>
                     </div>
-                    <button className="button-main mt-2">
+                    <Link href="/rooms/create" className="button-main">
                         <i className="bi bi-plus-lg mr-2"></i>
                         Create Room
-                    </button>
+                    </Link>
                 </div>
             </div>
         </div>

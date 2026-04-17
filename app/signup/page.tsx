@@ -1,19 +1,33 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Alert from "../components/alert";
 import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 export default function SignUpForm() {
+  const router = useRouter();
+  const { status } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState(""); 
   const [success, setSuccess] = useState(false);
+  const [newLogin, setNewLogin] = useState(false);
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      if (!newLogin) {
+        router.replace("/rooms");
+      }
+    }
+  }, [router, status]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setNewLogin(true);
     error && setError("");
     const errors: string[] = [];
     

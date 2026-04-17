@@ -1,8 +1,9 @@
-import { getRooms } from "../lib/rooms/rooms";
+import { getAllRooms } from "../lib/db/rooms";
 import Link from "next/link";
 
 export default async function RoomsPage() {
-    const rooms = getRooms();
+    const rooms = await getAllRooms();
+    console.log(rooms)
     return (
         <>
         <div>
@@ -33,7 +34,7 @@ export default async function RoomsPage() {
                             <input type="text" placeholder="Search rooms..." className="placeholder:text-gray-400 border w-full border-gray-300 p-2 rounded-lg mb-4 text-sm font-light placeholder:normal-case focus:border-blue-500" />
                             <hr className="w-full mb-4 text-gray-400" />
                             {rooms.map((room) => (
-                                <div key={room.id} className="border p-5 rounded-lg">
+                                <div key={room.id} className="border p-5 rounded-lg"> 
                                     <p className="font-semibold">{room.name}</p>
                                     <p className="text-sm text-gray-500">{room.description}</p>
                                     <a href={`/rooms/${room.id}`} className="text-blue-500 text-sm">Join Room</a>

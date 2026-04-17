@@ -1,7 +1,7 @@
 import Database from "better-sqlite3";
 
 // create / open DB
-const db = new Database("../../focusroom.db");
+const db = new Database("../../../focusroom.db");
 
 // initialize tables
 db.exec(`
@@ -38,6 +38,20 @@ db.exec(`
     UNIQUE(user_id, friend_id),
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (friend_id) REFERENCES users(id)
+  );
+
+  CREATE TABLE IF NOT EXISTS rooms (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    description TEXT,
+    host_id INTEGER NOT NULL,
+    publicity TEXT NOT NULL DEFAULT 'public',
+    invite_code TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    max_members INTEGER,
+    FOREIGN KEY (host_id) REFERENCES users(id),
+    UNIQUE(host_id, invite_code)
   );
 `);
 

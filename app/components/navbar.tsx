@@ -8,7 +8,6 @@ export function Navbar() {
   const { data: session, status } = useSession();
   const user = status === "authenticated" ? session.user : null;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <>
