@@ -1,8 +1,9 @@
 import { getUserById } from "@/app/lib/db/users";
 import { authOptions } from "@/app/lib/auth/auth-options";
 import { getServerSession } from "next-auth/next";
-import { redirect } from "next/navigation";
 import Link from "next/link";
+import { areFriends } from "@/app/lib/db/friends";
+import FriendButton from "./friend-button";
 
 
 export default async function Page({ params }: { params: { id: string } }) {
@@ -10,7 +11,12 @@ export default async function Page({ params }: { params: { id: string } }) {
     const id = param.id;
     const user = getUserById(Number(id));
     const session = await getServerSession(authOptions);
-    console.log("Session:", session?.user.id, "User:", JSON.stringify(user?.id));
+    const sessionUserId = session?.user?.id ? Number(session.user.id) : null;
+    const isSelf = sessionUserId !== null && user ? sessionUserId === user.id : false;
+    const initiallyFriend =
+        sessionUserId !== null && user && !isSelf
+            ? areFriends(sessionUserId, user.id)
+            : false;
 
     if (!user) {
         return (
@@ -55,11 +61,11 @@ export default async function Page({ params }: { params: { id: string } }) {
                                 </div>
                             )}
                         </div>
-                        {!session || JSON.stringify(session?.user.id) !== `"${JSON.stringify(user?.id)}"` ? (
-                            <button className="button-main mt-2">
-                                <i className="bi bi-person-plus mr-2"></i>
-                                Add as Friend
-                            </button>
+                        {sessionUserId !== null && !isSelf ? (
+                            <FriendButton
+                                targetUserId={user.id}
+                                initiallyFriend={initiallyFriend}
+                            />
                         ) : null}
                     </div>
 
@@ -87,13 +93,13 @@ export default async function Page({ params }: { params: { id: string } }) {
                             No rooms yet.
                         </div>
                     </div>
-                    {session && JSON.stringify(session?.user.id) === `"${JSON.stringify(user?.id)}"` && (
+                    {isSelf && (
                         <div className="mt-6">
                             <Link href="/profile" className="button-main">
                                 <i className="bi bi-pencil mr-2"></i>
                                 Edit Your Own Profile
                             </Link>
-                        </div>    
+                        </div>
                     )}
                 </div>
             </div>

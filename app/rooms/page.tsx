@@ -1,51 +1,54 @@
-import { getAllRooms } from "../lib/db/rooms";
-import Link from "next/link";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../lib/auth/auth-options";
+import { getAllRooms, getRoomByHostId } from "../lib/db/rooms";
+import RoomsBrowser, { type RoomSummary } from "./rooms-browser";
+
+type RoomRow = {
+    id: number;
+    name: string;
+    description: string | null;
+    publicity: string;
+    created_at: string;
+    max_members: number | null;
+};
 
 export default async function RoomsPage() {
-    const rooms = await getAllRooms();
-    console.log(rooms)
+    const session = await getServerSession(authOptions);
+    let existingRoom: RoomRow | null = null;
+    if (session) {
+        const existing = getRoomByHostId(Number(session.user.id));
+        if (existing) {
+            existingRoom = existing as RoomRow;
+        }
+    }
+            
+    const all = getAllRooms() as RoomRow[];
+    const publicRooms: RoomSummary[] = all
+        .filter((r) => r.publicity !== "private")
+        .map((r) => ({
+            id: r.id,
+            name: r.name,
+            description: r.description,
+            publicity: r.publicity,
+            created_at: r.created_at,
+            max_members: r.max_members,
+        }));
+
+    const createHref = session ? "/rooms/create" : "/signin?callbackUrl=/rooms/create";
+
     return (
-        <>
-        <div>
-            <div className="h-screen justify-center items-center flex">    
-                <div>
-                    <p className="text-center text-2xl font-semibold">Rooms</p>
-                    <div className="flex gap-20 mt-10">
-                        <div>
-                            <div className="card w-[20vw] mb-5">
-                                <p className="text-lg mb-4">Create room</p>
-                                <div className="flex  items-center justify-center">
-                                    <Link href='/rooms/create' className="button-main w-full text-sm text-white/90 text-center"><i className="bi bi-plus mr-2"></i>Create Room</Link>
-                                </div>
-                            </div>
+        <div className="min-h-screen bg-zinc-50">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-24 pb-16">
+                <header className="mb-8 md:mb-12 text-center">
+                    <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Rooms</h1>
+                    <p className="text-gray-500 mt-2 text-sm md:text-base max-w-xl mx-auto">
+                        Join a focus session with friends, or start your own. Everyone on the
+                        same timer, in sync.
+                    </p>
+                </header>
 
-                            <div className="card w-[20vw]">
-                                <p className="text-lg mb-4">Join room</p>
-                                <div className="block">
-                                    <input maxLength={10} type="text" placeholder="Enter room code" className="uppercase w-full placeholder:text-gray-400 border border-gray-300 p-2 rounded-lg mb-2 text-sm font-light placeholder:normal-case focus:border-blue-500" /><br />
-                                    <button className="button-secondary w-full"><i className="bi bi-search mr-2"></i>Join</button>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <div className="w-[20vw]">
-                            <p className="text-lg font-semibold mb-2">Available Rooms</p>
-                            <input type="text" placeholder="Search rooms..." className="placeholder:text-gray-400 border w-full border-gray-300 p-2 rounded-lg mb-4 text-sm font-light placeholder:normal-case focus:border-blue-500" />
-                            <hr className="w-full mb-4 text-gray-400" />
-                            {rooms.map((room) => (
-                                <div key={room.id} className="border p-5 rounded-lg"> 
-                                    <p className="font-semibold">{room.name}</p>
-                                    <p className="text-sm text-gray-500">{room.description}</p>
-                                    <a href={`/rooms/${room.id}`} className="text-blue-500 text-sm">Join Room</a>
-                                </div>
-                            ))}
-                            {rooms.length === 0 && <p className="text-gray-500">No rooms available. <br /> Create one!</p>}
-                        </div>
-                    </div>
-                </div>
+                <RoomsBrowser rooms={publicRooms} existingRoom={existingRoom} createHref={createHref} />
             </div>
         </div>
-        </>
     );
 }

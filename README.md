@@ -33,6 +33,7 @@ What is still incomplete or clearly in progress:
 - NextAuth
 - better-sqlite3 / SQLite
 - Tailwind CSS 4
+- Planned: socket.io
 
 ## Getting Started
 
