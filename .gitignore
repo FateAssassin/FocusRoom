@@ -44,4 +44,4 @@ next-env.d.ts
 /public/uploads/profile-pictures/*
 
 # database
-focusroom.db
+*.db

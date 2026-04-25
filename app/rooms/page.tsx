@@ -10,6 +10,7 @@ type RoomRow = {
     publicity: string;
     created_at: string;
     max_members: number | null;
+    invite_code: string | null;
 };
 
 export default async function RoomsPage() {
@@ -17,6 +18,7 @@ export default async function RoomsPage() {
     let existingRoom: RoomRow | null = null;
     if (session) {
         const existing = getRoomByHostId(Number(session.user.id));
+        console.log(existing);
         if (existing) {
             existingRoom = existing as RoomRow;
         }
@@ -32,6 +34,7 @@ export default async function RoomsPage() {
             publicity: r.publicity,
             created_at: r.created_at,
             max_members: r.max_members,
+            invite_code: r.invite_code,
         }));
 
     const createHref = session ? "/rooms/create" : "/signin?callbackUrl=/rooms/create";

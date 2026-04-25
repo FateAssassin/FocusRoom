@@ -20,7 +20,7 @@ export default async function ProfilePage() {
     }
 
     return(
-        <div className="min-h-screen flex items-center justify-center p-6">
+        <div className="min-h-screen flex items-center justify-center px-6 pt-24 pb-16">
             <div className="w-full max-w-md">
                 {/* Banner */}
                 <div className="h-28 rounded-t-2xl relative overflow-hidden"

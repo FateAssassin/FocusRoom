@@ -1,7 +1,11 @@
 import { authOptions } from "../lib/auth/auth-options";
 import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
-import { getFriendsWithRooms } from "../lib/db/friends";
+import {
+    getFriendsWithRooms,
+    getIncomingRequests,
+    getOutgoingRequests,
+} from "../lib/db/friends";
 import FriendsList from "./friends-list";
 
 export default async function FriendsPage() {
@@ -11,6 +15,8 @@ export default async function FriendsPage() {
     }
     const me = Number(session.user.id);
     const friends = getFriendsWithRooms(me);
+    const incoming = getIncomingRequests(me);
+    const outgoing = getOutgoingRequests(me);
 
     return (
         <div className="min-h-screen bg-zinc-50">
@@ -18,10 +24,10 @@ export default async function FriendsPage() {
                 <header className="mb-8 md:mb-12 text-center">
                     <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Friends</h1>
                     <p className="text-gray-500 mt-2 text-sm md:text-base max-w-xl mx-auto">
-                        Jump into a friend&apos;s public room or trim your list.
+                        Manage requests, jump into a friend&apos;s public room, or trim your list.
                     </p>
                 </header>
-                <FriendsList friends={friends} />
+                <FriendsList friends={friends} incoming={incoming} outgoing={outgoing} />
             </div>
         </div>
     );

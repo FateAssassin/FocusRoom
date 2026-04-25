@@ -73,12 +73,12 @@ export default function Home() {
             </Link>
           ) : (
             <>
-            <Link href="/signin" className="button-main mb-3 inline-block">
+            <Link href="/signup" className="button-main mb-3 inline-block">
               Join Now
             </Link>
             <br />
-            <Link href="/rooms" className="button-secondary inline-block">
-              Join as Guest
+            <Link href="/signin" className="button-secondary inline-block">
+              Already have an account? Sign up
             </Link></>
           )}
         </div>

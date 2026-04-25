@@ -18,24 +18,21 @@ export function createRoom(Room: Room) {
     const info = stmt.run(Room.host_id, Room.name, Room.description, Room.publicity, Room.created_at, Room.updated_at, Room.max_members, Room.invite_code);
     return info;
 }
-export function getRoomByHostId(hostId: number) {
+export function getRoomByHostId(hostId: number): Room | undefined {
     const stmt = db.prepare("SELECT * FROM rooms WHERE host_Id = ?");
-    const room = stmt.get(hostId);
-    return room;
+    return stmt.get(hostId) as Room | undefined;
 }
-export function getRoomById(roomId: number) {
+export function getRoomById(roomId: number): Room | undefined {
     const stmt = db.prepare("SELECT * FROM rooms WHERE id = ?");
-    const room = stmt.get(roomId);
-    return room;
+    return stmt.get(roomId) as Room | undefined;
 }
-export function getAllRooms() {
+export function getAllRooms(): Room[] {
     const stmt = db.prepare("SELECT * FROM rooms");
-    const rooms = stmt.all();
-    return rooms;
+    return stmt.all() as Room[];
 }
-export function updateRoom(roomId: number, roomName: string, description: string, publicity: string, maxMembers: number | null) {
-    const stmt = db.prepare("UPDATE rooms SET roomName = ?, description = ?, publicity = ?, maxMembers = ? WHERE id = ?");
-    const info = stmt.run(roomName, description, publicity, maxMembers, roomId);
+export function updateRoom(roomId: number, name: string, description: string, publicity: string, maxMembers: number | null) {
+    const stmt = db.prepare("UPDATE rooms SET name = ?, description = ?, publicity = ?, max_members = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
+    const info = stmt.run(name, description, publicity, maxMembers, roomId);
     return info;
 }
 export function deleteRoom(roomId: number) {

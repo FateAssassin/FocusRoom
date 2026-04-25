@@ -41,7 +41,7 @@ export function SignInPageContent() {
   if (password.trim() === "") {
     errors.push("error-password");
   }
-  if (password && password.length < 6) {
+  if (password && password.length < 8) {
     errors.push("error-length-password");
   }
 
@@ -109,7 +109,7 @@ export function SignInPageContent() {
               {error.includes("error-password") ? "Please enter a password." : ""}
             </p>
             <p className={`text-red-500 text-sm leading-0 ml-1 ${error.includes("error-length-password") ? "block" : "hidden"}`}>
-              {error.includes("error-length-password") ? "Password must be at least 6 characters long." : ""}
+              {error.includes("error-length-password") ? "Password must be at least 8 characters long." : ""}
             </p>
 
             <button type="submit" className="w-full button-main transition">

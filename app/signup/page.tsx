@@ -41,15 +41,17 @@ export default function SignUpForm() {
     }
     if (email.trim() === "") {
       errors.push("error-email");
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      errors.push("error-email-format");
     }
     if (password.trim() === "") {
       errors.push("error-password");
-    } 
-    if (password.length < 6) {
+    }
+    if (password.length < 8) {
       if (!errors.includes("error-password")) {
         errors.push("error-length-password");
       }
-    }      
+    }
     if (!errors.includes("error-password") && password !== confirmPassword || !errors.includes("error-length-password") && password !== confirmPassword) {
       errors.push("error-confirm-password");
     }
@@ -91,9 +93,12 @@ export default function SignUpForm() {
     {success &&
       <Alert message='Account created successfully! Redirecting...' type="success" />
     }
-    {error &&
-      <Alert message={error === "User with that email or username already exists, please choose a different one or sign in." ? error : ""} type="error" />
-    }
+    {error && (
+      error === "User with that email or username already exists, please choose a different one or sign in." ||
+      error.startsWith("Too many")
+    ) && (
+      <Alert message={error} type="error" />
+    )}
     <div className="rounded-lg shadow-xl p-8 w-full max-w-md card">
     <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h1>
     <p className="text-gray-500 mb-6">Join us today and start focusing.</p>
@@ -113,7 +118,8 @@ export default function SignUpForm() {
       onChange={(e) => setEmail(e.target.value)}
       className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${error.includes("error-email") ? "border-red-500 placeholder:text-red-500" : ""}`}
       />
-      <p className={`text-red-500 text-sm leading-0 ml-1 ${error.includes("error-email") ? "block" : "hidden"}`}>{error.includes("error-email") ? "Please enter an email." : ""}</p>
+      <p className={`text-red-500 text-sm leading-0 ml-1 ${error.includes("error-email") && !error.includes("error-email-format") ? "block" : "hidden"}`}>{error.includes("error-email") && !error.includes("error-email-format") ? "Please enter an email." : ""}</p>
+      <p className={`text-red-500 text-sm leading-0 ml-1 ${error.includes("error-email-format") ? "block" : "hidden"}`}>{error.includes("error-email-format") ? "Please enter a valid email address." : ""}</p>
       <input
       type="password"
       placeholder="Password"
@@ -129,7 +135,7 @@ export default function SignUpForm() {
       className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${error.includes("error-confirm-password") || error.includes("error-password") || error.includes("error-length-password") ? "border-red-500 placeholder:text-red-500" : ""}`}
       />
       <p className={`text-red-500 text-sm leading-0 ml-1 ${error.includes("error-password") ? "block" : "hidden"}`}>{error.includes("error-password") ? "Please enter a password." : ""}</p>
-      <p className={`text-red-500 text-sm leading-0 ml-1 ${error.includes("error-length-password") ? "block" : "hidden"}`}>{error.includes("error-length-password") ? "Password must be at least 6 characters long." : ""}</p>
+      <p className={`text-red-500 text-sm leading-0 ml-1 ${error.includes("error-length-password") ? "block" : "hidden"}`}>{error.includes("error-length-password") ? "Password must be at least 8 characters long." : ""}</p>
       <p className={`text-red-500 text-sm leading-0 ml-1 ${error.includes("error-confirm-password") ? "block" : "hidden"}`}>{error.includes("error-confirm-password") ? "Passwords do not match." : ""}</p>
       
       <button type="submit" className="w-full button-main transition">

@@ -2,7 +2,7 @@ import { getUserById } from "@/app/lib/db/users";
 import { authOptions } from "@/app/lib/auth/auth-options";
 import { getServerSession } from "next-auth/next";
 import Link from "next/link";
-import { areFriends } from "@/app/lib/db/friends";
+import { getFriendshipStatus } from "@/app/lib/db/friends";
 import FriendButton from "./friend-button";
 
 
@@ -13,10 +13,10 @@ export default async function Page({ params }: { params: { id: string } }) {
     const session = await getServerSession(authOptions);
     const sessionUserId = session?.user?.id ? Number(session.user.id) : null;
     const isSelf = sessionUserId !== null && user ? sessionUserId === user.id : false;
-    const initiallyFriend =
+    const friendshipStatus =
         sessionUserId !== null && user && !isSelf
-            ? areFriends(sessionUserId, user.id)
-            : false;
+            ? getFriendshipStatus(sessionUserId, user.id)
+            : "none";
 
     if (!user) {
         return (
@@ -33,7 +33,7 @@ export default async function Page({ params }: { params: { id: string } }) {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-6">
+        <div className="min-h-screen flex items-start justify-center px-6 pt-24 pb-16">
             <div className="w-full max-w-md">
                 {/* Banner */}
                 <div className="h-28 rounded-t-2xl relative overflow-hidden"
@@ -64,7 +64,7 @@ export default async function Page({ params }: { params: { id: string } }) {
                         {sessionUserId !== null && !isSelf ? (
                             <FriendButton
                                 targetUserId={user.id}
-                                initiallyFriend={initiallyFriend}
+                                initialStatus={friendshipStatus}
                             />
                         ) : null}
                     </div>

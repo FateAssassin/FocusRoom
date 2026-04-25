@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState, useMemo, useState } from "react";
 import { joinRoomByCode, type JoinRoomState } from "@/app/lib/actions";
+import { ExistingRoomBar } from "./existingRoom";
 
 export type RoomSummary = {
     id: number;
@@ -11,6 +12,7 @@ export type RoomSummary = {
     publicity: string;
     created_at: string;
     max_members: number | null;
+    invite_code: string | null;
 };
 
 const INITIAL_JOIN_STATE: JoinRoomState = {};
@@ -25,6 +27,7 @@ export default function RoomsBrowser({
     createHref: string;
 }) {
     const [query, setQuery] = useState("");
+    const [copy, setCopy] = useState(false);
     const [joinState, joinAction, joinPending] = useActionState(
         joinRoomByCode,
         INITIAL_JOIN_STATE,
@@ -39,10 +42,16 @@ export default function RoomsBrowser({
         );
     }, [rooms, query]);
 
+    const copyCode = () => {
+        navigator.clipboard.writeText(existingRoom?.invite_code ?? "");
+        setCopy(true);
+        setTimeout(() => setCopy(false), 2000);
+    }
+
     return (
+        
         <div className="grid gap-6 lg:grid-cols-3">
             <aside className="space-y-4 lg:col-span-1">
-
                 <div className="card">
                     {existingRoom ? (
                         <div>
@@ -53,8 +62,23 @@ export default function RoomsBrowser({
                                         <h2 className="text-lg font-semibold">You have an existing room:</h2>
                                     </div>
                                     <p>{existingRoom.name}</p>
-                                    <p>{existingRoom.description}</p>
-                                    <p>{existingRoom.publicity}</p>
+                                    <p></p>
+                                    <p className="text-sm text-gray-500">{existingRoom.description}</p>
+                                    <button onClick={copyCode} className="cursor-pointer mt-1">Invite Code: &nbsp;
+                                        {copy ? 
+                                            <span className="text-sm text-gray-100 px-2 py-0.5 rounded-sm hover:rounded-lg duration-150 bg-green-500"><i className="bi bi-clipboard"></i> Copied!</span> : 
+                                            <span className="text-sm text-gray-200 px-2 py-0.5 rounded-sm hover:rounded-lg duration-150 bg-gray-400">{existingRoom.invite_code}</span>
+                                        }
+                                    </button>
+                                    <ExistingRoomBar
+                                        room={{
+                                            id: existingRoom.id,
+                                            name: existingRoom.name,
+                                            description: existingRoom.description,
+                                            publicity: existingRoom.publicity,
+                                            max_members: existingRoom.max_members,
+                                        }}
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -90,6 +114,7 @@ export default function RoomsBrowser({
                         name="code"
                         type="text"
                         maxLength={10}
+                        minLength={10}
                         autoComplete="off"
                         placeholder="Enter room code"
                         aria-describedby="join-error"
@@ -185,13 +210,9 @@ function RoomCard({ room }: { room: RoomSummary }) {
                     {formatDate(room.created_at)}
                 </span>
             </div>
-            
-            {/* <div>
-                {room.description}
-            </div> */}
 
             <Link
-                href={`/rooms/${room.id}`}
+                href={`/room/${room.id}`}
                 className="button-main text-sm text-center mt-auto inline-flex items-center justify-center"
             >
                 <i className="bi bi-door-open mr-2"></i>

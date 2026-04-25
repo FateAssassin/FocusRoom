@@ -1,8 +1,11 @@
 import { getRoomByHostId, createRoom } from "@/app/lib/db/rooms";
+import { authOptions } from "@/app/lib/auth/auth-options";
+import { getServerSession } from "next-auth";
 
 export async function POST(req: Request) {
-    const { roomName, description, publicity, maxMembers, hostId } = await req.json();
-    const existingRoom = getRoomByHostId(hostId);
+    const { roomName, description, publicity, maxMembers, hostId} = await req.json();
+    const session = await getServerSession(authOptions)
+    const existingRoom = getRoomByHostId(Number(session?.user.id));
     if (existingRoom) {
         return new Response("Host already has a room", { status: 400 });
     }
@@ -11,7 +14,7 @@ export async function POST(req: Request) {
     }
     const newRoom = {
         id: Math.floor(Math.random() * 1000000),
-        host_id: hostId,
+        host_id: Number(session?.user.id),
         name: roomName,
         description: description || "",
         publicity: publicity,
