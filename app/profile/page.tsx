@@ -3,6 +3,7 @@ import { authOptions } from "../lib/auth/auth-options";
 import ChangeProfilePicture from "../components/profile/changeProfilePicture";
 import EditDescription from "../components/profile/editDescription";
 import { getUserById } from "../lib/db/users";
+import { getRoomByHostId } from "../lib/db/rooms";
 import { redirect } from "next/navigation";
 import Link from "next/dist/client/link";
 
@@ -18,6 +19,7 @@ export default async function ProfilePage() {
         redirect("/signin");
         return null;
     }
+    const room = getRoomByHostId(Number(session.user.id));
 
     return(
         <div className="min-h-screen flex items-center justify-center px-6 pt-24 pb-16">
@@ -47,14 +49,40 @@ export default async function ProfilePage() {
                     {/* Rooms section */}
                     <div>
                         <h2 className="text-xs mt-2 font-semibold uppercase tracking-widest mb-2" style={{ color: "rgb(43, 127, 255)" }}>Rooms</h2>
-                        <div className="rounded-xl p-4 text-gray-400 text-sm italic mb-4" style={{ backgroundColor: "rgb(220, 220, 220)" }}>
-                            No rooms yet.
-                        </div>
+                        {room && room.id !== null ? (
+                            <Link
+                                href={`/room/${room.id}`}
+                                className="block rounded-xl p-4 mb-4 border border-gray-200 hover:border-blue-400 hover:shadow-sm transition"
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div className="min-w-0">
+                                        <p className="font-semibold text-gray-900 truncate">{room.name}</p>
+                                        {room.description ? (
+                                            <p className="text-sm text-gray-500 truncate">{room.description}</p>
+                                        ) : null}
+                                    </div>
+                                    <span className="text-xs uppercase tracking-wide text-gray-400 ml-3 shrink-0">
+                                        {room.publicity}
+                                    </span>
+                                </div>
+                            </Link>
+                        ) : (
+                            <div className="rounded-xl p-4 text-gray-400 text-sm italic mb-4" style={{ backgroundColor: "rgb(220, 220, 220)" }}>
+                                No rooms yet.
+                            </div>
+                        )}
                     </div>
-                    <Link href="/rooms/create" className="button-main">
-                        <i className="bi bi-plus-lg mr-2"></i>
-                        Create Room
-                    </Link>
+                    {room && room.id !== null ? (
+                        <Link href={`/room/${room.id}`} className="button-main">
+                            <i className="bi bi-box-arrow-in-right mr-2"></i>
+                            Open Room
+                        </Link>
+                    ) : (
+                        <Link href="/rooms/create" className="button-main">
+                            <i className="bi bi-plus-lg mr-2"></i>
+                            Create Room
+                        </Link>
+                    )}
                 </div>
             </div>
         </div>

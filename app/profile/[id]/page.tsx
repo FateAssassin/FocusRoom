@@ -3,6 +3,7 @@ import { authOptions } from "@/app/lib/auth/auth-options";
 import { getServerSession } from "next-auth/next";
 import Link from "next/link";
 import { getFriendshipStatus } from "@/app/lib/db/friends";
+import { getRoomByHostId } from "@/app/lib/db/rooms";
 import FriendButton from "./friend-button";
 
 
@@ -17,6 +18,8 @@ export default async function Page({ params }: { params: { id: string } }) {
         sessionUserId !== null && user && !isSelf
             ? getFriendshipStatus(sessionUserId, user.id)
             : "none";
+    const room = user ? getRoomByHostId(user.id) : undefined;
+    const isRoomVisible = !!room && (room.publicity !== "private" || isSelf);
 
     if (!user) {
         return (
@@ -33,7 +36,7 @@ export default async function Page({ params }: { params: { id: string } }) {
     }
 
     return (
-        <div className="min-h-screen flex items-start justify-center px-6 pt-24 pb-16">
+        <div className="min-h-screen flex items-center justify-center px-6 pt-24 pb-16">
             <div className="w-full max-w-md">
                 {/* Banner */}
                 <div className="h-28 rounded-t-2xl relative overflow-hidden"
@@ -89,9 +92,28 @@ export default async function Page({ params }: { params: { id: string } }) {
                     {/* Rooms section */}
                     <div>
                         <h2 className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: "rgb(43, 127, 255)" }}>Rooms</h2>
-                        <div className="rounded-xl p-4 text-gray-400 text-sm italic" style={{ backgroundColor: "rgb(220, 220, 220)" }}>
-                            No rooms yet.
-                        </div>
+                        {isRoomVisible && room && room.id !== null ? (
+                            <Link
+                                href={`/room/${room.id}`}
+                                className="block rounded-xl p-4 border border-gray-200 hover:border-blue-400 hover:shadow-sm transition"
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div className="min-w-0">
+                                        <p className="font-semibold text-gray-900 truncate">{room.name}</p>
+                                        {room.description ? (
+                                            <p className="text-sm text-gray-500 truncate">{room.description}</p>
+                                        ) : null}
+                                    </div>
+                                    <span className="text-xs uppercase tracking-wide text-gray-400 ml-3 shrink-0">
+                                        {room.publicity}
+                                    </span>
+                                </div>
+                            </Link>
+                        ) : (
+                            <div className="rounded-xl p-4 text-gray-400 text-sm italic" style={{ backgroundColor: "rgb(220, 220, 220)" }}>
+                                No rooms yet.
+                            </div>
+                        )}
                     </div>
                     {isSelf && (
                         <div className="mt-6">

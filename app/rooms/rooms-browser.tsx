@@ -113,8 +113,8 @@ export default function RoomsBrowser({
                     <input
                         name="code"
                         type="text"
-                        maxLength={10}
-                        minLength={10}
+                        maxLength={6}
+                        minLength={6}
                         autoComplete="off"
                         placeholder="Enter room code"
                         aria-describedby="join-error"
