@@ -29,52 +29,57 @@ export function SignInPageContent() {
   }, [router, status]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setNewLogin(true);
-  if (error) setError("");
+    e.preventDefault();
+    setNewLogin(true);
+    if (error) setError("");
 
-  const errors: string[] = [];
+    const errors: string[] = [];
 
-  if (email.trim() === "") {
-    errors.push("error-email");
-  }
-  if (password.trim() === "") {
-    errors.push("error-password");
-  }
-  if (password && password.length < 8) {
-    errors.push("error-length-password");
-  }
+    if (email.trim() === "") {
+      errors.push("error-email");
+    }
+    if (password.trim() === "") {
+      errors.push("error-password");
+    }
+    if (password && password.length < 8) {
+      errors.push("error-length-password");
+    }
 
-  if (errors.length > 0) {
-    setError(errors.join(","));
-    return;
-  }
-  const result = await signIn("credentials", {
-    email,
-    password,
-    redirect: false,
-    callbackUrl,
-  });
+    if (errors.length > 0) {
+      setError(errors.join(","));
+      return;
+    }
+    const result = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+      callbackUrl,
+    });
+    console.log(result)
+    if (result?.status === 429){
+      setError("Too many requests!")
+      setSuccess(false)
+      return
+    }
+    if (!result || result?.error) {
+      setError("Invalid credentials");
+      setSuccess(false);
+      return;
+    }
 
-  if (!result || result.error) {
-    setError(result?.error || "Invalid credentials");
-    setSuccess(false);
-    return;
-  }
+    setSuccess(true);
+    setError("");
 
-  setSuccess(true);
-  setError("");
-
-  setTimeout(() => {
-    router.push("/rooms");
-    router.refresh();
-  }, 3000);
-};
+    setTimeout(() => {
+      router.push("/rooms");
+      router.refresh();
+    }, 3000);
+  };
 
   return (
     <>
       {success && <Alert message="Signed in successfully! Redirecting..." type="success" />}
-      {error && <Alert message={typeof error === "string" ? error : "Something went wrong"} type="error" />}
+      {error && !error.startsWith("error-") && <Alert message={error} type="error" />}
       <div className="min-h-screen flex items-center justify-center">
         <div className="rounded-lg shadow-xl p-8 w-full max-w-md card">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Sign In</h1>

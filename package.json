@@ -11,20 +11,16 @@
   "dependencies": {
     "@next/env": "^16.2.4",
     "@types/bcrypt": "^6.0.0",
-    "axios": "^1.14.0",
     "bcrypt": "^6.0.0",
     "better-sqlite3": "^12.8.0",
     "bootstrap-icons": "^1.13.1",
-    "fs": "0.0.1-security",
     "jsonwebtoken": "^9.0.3",
     "next": "16.2.1",
     "next-auth": "^4.24.13",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "socket.io": "^4.8.3",
-    "socket.io-client": "^4.8.3",
-    "sqlite": "^5.1.1",
-    "sqlite3": "^6.0.1"
+    "socket.io-client": "^4.8.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

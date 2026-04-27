@@ -13,7 +13,7 @@ export async function POST(req: Request) {
         return new Response("Missing required fields", { status: 400 });
     }
     const newRoom = {
-        id: Math.floor(Math.random() * 1000000),
+        id: null,
         host_id: Number(session?.user.id),
         name: roomName,
         description: description || "",
@@ -24,6 +24,9 @@ export async function POST(req: Request) {
         invite_code: Math.random().toString(36).substring(2, 8),
         empty_since: null,
     };
-    createRoom(newRoom);
-    return new Response(JSON.stringify(newRoom), { status: 201 });
+    const result = createRoom(newRoom);
+    if (!result.ok) {
+        return new Response(result.error, { status: 500 });
+    }
+    return new Response(JSON.stringify(result.data), { status: 201 });
 }

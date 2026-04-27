@@ -10,7 +10,6 @@ import logo from "../logo.png";
 export function Navbar() {
   const { data: session, status } = useSession();
   const user = status === "authenticated" ? session.user : null;
-  const pathname = usePathname();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [incomingCount, setIncomingCount] = useState(0);
 
@@ -31,11 +30,11 @@ export function Navbar() {
 
   useEffect(() => {
     fetchIncoming();
-  }, [fetchIncoming, pathname]);
+  }, [fetchIncoming]);
 
   useEffect(() => {
     if (!user) return;
-    const interval = setInterval(fetchIncoming, 30000);
+    const interval = setInterval(fetchIncoming, 60000);
     return () => clearInterval(interval);
   }, [user, fetchIncoming]);
 

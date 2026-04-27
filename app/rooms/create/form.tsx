@@ -1,37 +1,36 @@
 "use client"
 
 import Alert from "@/app/components/alert";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { createRoomAction } from "@/app/lib/actions";
 
-export default function CreateRoomForm({hostId}: {hostId?: number}) {
+export default function CreateRoomForm({hostId}: {hostId: number}) {
+    const router = useRouter();
     const [roomName, setRoomName] = useState("");
     const [description, setDescription] = useState("");
     const [publicity, setPublicity] = useState("public");
-    const [maxMembers, setMaxMembers] = useState<number | "">("");
+    const [maxMembers, setMaxMembers] = useState<string | null>(null);
     const [error, setError] = useState("");
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-
-        const res = await fetch("/api/createroom", {
-          method: "POST",
-          body: JSON.stringify({ roomName, description, publicity, maxMembers, hostId }),
-          headers: {
-          "Content-Type": "application/json",
-          },
-        });
-        console.log(res);
-        if (res.ok) {          
-            const data = await res.json();
-            console.log(data);
-            // window.location.href = `/rooms/${data.id}`;
-        } else {
-          alert("Failed to create room");
+        setError("");
+        const res = await createRoomAction(hostId, roomName, description, publicity, maxMembers ? Number(maxMembers) : null);
+        if (res.error) {
+            setError(res.error);
+            return;
         }
+        if (res.ok && res.roomId !== undefined) {
+            router.push(`/room/${res.roomId}`);
+            return;
+        }
+        setError("Failed to create room");
     };
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
+            <Alert message={error} type="error" />
             <div>
                 <label htmlFor="roomName" className="block text-sm font-medium text-gray-700 mt-4">
                     Room Name
@@ -91,7 +90,7 @@ export default function CreateRoomForm({hostId}: {hostId?: number}) {
                     </div>
                 </div>
                 <div>
-                    <input type="number" value={maxMembers} placeholder="Max members" onChange={(e)=>setMaxMembers(parseInt(e.target.value) || 0)} max={100} className="mt-3 px-2 py-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                    <input type="number" value={maxMembers ?? ""} placeholder="Max members" onChange={(e)=>setMaxMembers(e.target.value)} max={100} className="mt-3 px-2 py-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
                 </div>
             </div>
             <button

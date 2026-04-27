@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { getServerSession } from "next-auth";
 import { authOptions } from "./auth/auth-options";
+import { type Room, createRoom} from "./db/rooms"
 import db from "./db/db";
 import {
     acceptFriendRequest,
@@ -125,7 +126,8 @@ export type RoomActionState = { error?: string; ok?: boolean };
 export async function deleteMyRoomAction(): Promise<RoomActionState> {
     const me = await currentUserId();
     if (me === null) return { error: "You must be signed in." };
-    deleteRoomsByHostId(me);
+    const result = deleteRoomsByHostId(me);
+    if (!result.ok) return { error: result.error };
     revalidatePath("/rooms");
     return { ok: true };
 }
@@ -158,7 +160,39 @@ export async function updateMyRoomAction(
         maxMembers = Math.floor(n);
     }
 
-    updateRoom(room.id, name, description, publicity, maxMembers);
+    const updateResult = updateRoom(Number(room.id), name, description, publicity, maxMembers);
+    if (!updateResult.ok) return { error: updateResult.error };
     revalidatePath("/rooms");
     return { ok: true };
+}
+
+export type CreateRoomState = { error?: string; ok?: boolean; roomId?: number };
+
+export async function createRoomAction(
+    hostId: number, roomName: string, description: string, publicity: string, maxMembers: number | null
+): Promise<CreateRoomState> {
+    const me = await currentUserId();
+    if (me === null) return { error: "You must be signed in." };
+    const existingRoom = getRoomByHostId(Number(me));
+    if (existingRoom) {
+        return { error: "You already have a room." };
+    }
+    if (!roomName || !hostId || !publicity) {
+        return { error: "Missing required fields." };
+    }
+    const room: Room = {
+        id: null,
+        host_id: Number(hostId),
+        name: roomName,
+        description: description || "",
+        publicity: publicity,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        max_members: maxMembers || 10,
+        invite_code: Math.random().toString(36).substring(2, 8),
+        empty_since: null,
+    };
+    const result = createRoom(room);
+    if (!result.ok) return { error: result.error };
+    return { ok: true, roomId: Number(result.data.id) };
 }

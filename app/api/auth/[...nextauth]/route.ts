@@ -14,10 +14,17 @@ async function POST(req: Request, ctx: unknown) {
     const ip = getClientIp(req);
     const limit = rateLimit(`signin:${ip}`, SIGNIN_LIMIT);
     if (!limit.ok) {
-      return new Response("Too many sign-in attempts. Try again in a few minutes.", {
-        status: 429,
-        headers: { "Retry-After": String(retryAfterSeconds(limit.resetAt)) },
-      });
+      // NextAuth's client always res.json() and new URL(data.url), so the body
+      // must be JSON with a valid url field — otherwise signIn() throws before
+      // the caller can inspect result.status.
+      const errorUrl = new URL("/signin?error=TooManyRequests", req.url).toString();
+      return Response.json(
+        { url: errorUrl },
+        {
+          status: 429,
+          headers: { "Retry-After": String(retryAfterSeconds(limit.resetAt)) },
+        },
+      );
     }
   }
   return (handler as NextAuthHandler)(req, ctx);
