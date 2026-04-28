@@ -179,7 +179,7 @@ function RoomCard({ room }: { room: RoomSummary }) {
     return (
         <article className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition flex flex-col h-full">
             <div className="flex items-start justify-between gap-2 mb-2">
-                <h3 className="font-semibold text-gray-900 leading-tight break-words">{room.name}</h3>
+                <h3 className="font-semibold text-gray-900 leading-tight wrap-break-word">{room.name}</h3>
                 <span
                     className="shrink-0 inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-semibold px-2 py-1 rounded-full"
                     style={{
@@ -192,7 +192,7 @@ function RoomCard({ room }: { room: RoomSummary }) {
                 </span>
             </div>
 
-            <p className="text-sm text-gray-500 line-clamp-2 min-h-[2.5rem]">
+            <p className="text-sm text-gray-500 line-clamp-2 min-h-10">
                 {room.description
                     ? room.description
                     : <span className="italic text-gray-400">No description.</span>}
