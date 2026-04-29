@@ -53,6 +53,16 @@ db.exec(`
     FOREIGN KEY (host_id) REFERENCES users(id),
     UNIQUE(host_id, invite_code)
   );
+
+  CREATE TABLE IF NOT EXISTS blogs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    author_id INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (author_id) REFERENCES users(id)
+  );
 `);
 
 console.log("✅ Connected & tables ensured.");

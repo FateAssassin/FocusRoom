@@ -106,6 +106,7 @@ export function Navbar() {
               Sign Up
             </Link>
           )}
+          <Link href="/blog" className="button-secondary">Blog</Link>
           <Link href="/rooms" className="button-secondary">Rooms</Link>
         </div>
 
@@ -121,6 +122,12 @@ export function Navbar() {
             )}
           </summary>
           <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+            <Link
+              href="/blog"
+              className="block px-4 py-2 hover:bg-gray-100 w-full text-left"
+            >
+              Blog
+            </Link>
             <Link
               href="/rooms"
               className="block px-4 py-2 hover:bg-gray-100 w-full text-left"
