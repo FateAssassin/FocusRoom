@@ -1,8 +1,16 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../lib/auth/auth-options";
 import { isAdmin } from "../../lib/db/admins";
 import BlogForm from "../blog-form";
+
+export const metadata: Metadata = {
+    title: "New blog post",
+    description: "Create a new FocusRoom blog post.",
+    robots: { index: false, follow: false },
+    alternates: { canonical: "/blog/create" },
+};
 
 export default async function CreateBlogPage() {
     const session = await getServerSession(authOptions);

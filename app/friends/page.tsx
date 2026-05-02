@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { authOptions } from "../lib/auth/auth-options";
 import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
@@ -7,6 +8,13 @@ import {
     getOutgoingRequests,
 } from "../lib/db/friends";
 import FriendsList from "./friends-list";
+
+export const metadata: Metadata = {
+    title: "Friends",
+    description: "Manage friend requests and jump into your friends' public FocusRoom rooms.",
+    robots: { index: false, follow: false },
+    alternates: { canonical: "/friends" },
+};
 
 export default async function FriendsPage() {
     const session = await getServerSession(authOptions);

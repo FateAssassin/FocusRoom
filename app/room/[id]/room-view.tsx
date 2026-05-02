@@ -58,6 +58,9 @@ export default function RoomView({ room, me }: { room: RoomProps; me: MeProps })
     });
     const [chat, setChat] = useState<ChatMessage[]>([]);
     const [chatInput, setChatInput] = useState("");
+    const [chatCooldown, setChatCooldown] = useState(false);
+    const cooldownTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const CHAT_COOLDOWN_MS = 1500;
     const [durationMin, setDurationMin] = useState(25);
     const [phase, setPhase] = useState<"focus" | "break">("focus");
 
@@ -178,6 +181,15 @@ export default function RoomView({ room, me }: { room: RoomProps; me: MeProps })
             setChat((prev) => [...prev.slice(-199), msg]);
         });
 
+        socket.on("chat:cooldown", ({ remainingMs }: { remainingMs: number }) => {
+            setChatCooldown(true);
+            if (cooldownTimeoutRef.current) clearTimeout(cooldownTimeoutRef.current);
+            cooldownTimeoutRef.current = setTimeout(
+                () => setChatCooldown(false),
+                Math.max(0, remainingMs),
+            );
+        });
+
         socket.on("kicked", () => {
             setError("You were removed from the room.");
             setTimeout(() => router.push("/rooms"), 1200);
@@ -186,6 +198,10 @@ export default function RoomView({ room, me }: { room: RoomProps; me: MeProps })
         return () => {
             socket.disconnect();
             socketRef.current = null;
+            if (cooldownTimeoutRef.current) {
+                clearTimeout(cooldownTimeoutRef.current);
+                cooldownTimeoutRef.current = null;
+            }
         };
     }, [room.id, router]);
 
@@ -197,10 +213,17 @@ export default function RoomView({ room, me }: { room: RoomProps; me: MeProps })
 
     const sendChat = (e: React.FormEvent) => {
         e.preventDefault();
+        if (chatCooldown) return;
         const text = chatInput.trim();
         if (!text) return;
         socketRef.current?.emit("chat:send", { text });
         setChatInput("");
+        setChatCooldown(true);
+        if (cooldownTimeoutRef.current) clearTimeout(cooldownTimeoutRef.current);
+        cooldownTimeoutRef.current = setTimeout(
+            () => setChatCooldown(false),
+            CHAT_COOLDOWN_MS,
+        );
     };
 
     const setTimerOnServer = () => {
@@ -402,7 +425,7 @@ export default function RoomView({ room, me }: { room: RoomProps; me: MeProps })
                                     key={m.socketId}
                                     className="flex items-center gap-2 text-sm"
                                 >
-                                    <a href={`/profile/${m.userId}`} target="_blank" className="flex items-center gap-2 w-full ">
+                                    <a href={`/profile/${m.userId}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 w-full ">
                                         <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-600 overflow-hidden shrink-0">
                                             {m.pic ? (
                                                 // eslint-disable-next-line @next/next/no-img-element
@@ -562,10 +585,11 @@ export default function RoomView({ room, me }: { room: RoomProps; me: MeProps })
                                     />
                                     <button
                                         type="submit"
-                                        className="button-main inline-flex items-center text-sm"
-                                        disabled={!chatInput.trim() || !connected}
+                                        className="button-main inline-flex items-center text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                                        disabled={!chatInput.trim() || !connected || chatCooldown}
+                                        title={chatCooldown ? "Slow down a bit..." : undefined}
                                     >
-                                        <i className="bi bi-send"></i>
+                                        <i className={`bi ${chatCooldown ? "bi-hourglass-split" : "bi-send"}`}></i>
                                     </button>
                                 </form>
                             </>

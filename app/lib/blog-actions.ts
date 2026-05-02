@@ -6,6 +6,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "./auth/auth-options";
 import { isAdmin } from "./db/admins";
 import { createBlog, deleteBlog, getBlogById, updateBlog } from "./db/blogs";
+import { sanitizeBlogHtml } from "./sanitize-blog";
 
 const TITLE_MAX = 200;
 const CONTENT_MAX = 100_000;
@@ -34,10 +35,11 @@ export async function createBlogAction(title: string, content: string): Promise<
     if ("error" in auth) return { error: auth.error };
 
     const trimmedTitle = title.trim();
-    const validationError = validateInput(trimmedTitle, content);
+    const sanitizedContent = sanitizeBlogHtml(content);
+    const validationError = validateInput(trimmedTitle, sanitizedContent);
     if (validationError) return { error: validationError };
 
-    const result = createBlog(auth.id, trimmedTitle, content);
+    const result = createBlog(auth.id, trimmedTitle, sanitizedContent);
     if (!result.ok) return { error: result.error };
 
     revalidatePath("/blog");
@@ -52,10 +54,11 @@ export async function updateBlogAction(blogId: number, title: string, content: s
     if (!blog) return { error: "Blog not found." };
 
     const trimmedTitle = title.trim();
-    const validationError = validateInput(trimmedTitle, content);
+    const sanitizedContent = sanitizeBlogHtml(content);
+    const validationError = validateInput(trimmedTitle, sanitizedContent);
     if (validationError) return { error: validationError };
 
-    const result = updateBlog(blogId, trimmedTitle, content);
+    const result = updateBlog(blogId, trimmedTitle, sanitizedContent);
     if (!result.ok) return { error: result.error };
 
     revalidatePath("/blog");

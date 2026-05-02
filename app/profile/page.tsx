@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../lib/auth/auth-options";
 import ChangeProfilePicture from "../components/profile/changeProfilePicture";
@@ -7,9 +8,15 @@ import { getRoomByHostId } from "../lib/db/rooms";
 import { redirect } from "next/navigation";
 import Link from "next/dist/client/link";
 
+export const metadata: Metadata = {
+    title: "Your profile",
+    description: "Manage your FocusRoom profile, picture, description, and your hosted room.",
+    robots: { index: false, follow: false },
+    alternates: { canonical: "/profile" },
+};
+
 export default async function ProfilePage() {
     const session = await getServerSession(authOptions);
-    console.log(session?.user)
     if (!session) {
         redirect("/signin");
         return null;

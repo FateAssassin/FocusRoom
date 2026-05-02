@@ -52,7 +52,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.log(err)
     return NextResponse.json({ error: "User with that email or username already exists, please choose a different one or sign in." }, { status: 400 });
   }
 }

@@ -1,7 +1,28 @@
+import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../lib/auth/auth-options";
 import { getAllRooms, getRoomByHostId } from "../lib/db/rooms";
 import RoomsBrowser, { type RoomSummary } from "./rooms-browser";
+
+const roomsDescription =
+    "Browse public FocusRoom focus sessions or start your own. Share a synchronized Pomodoro timer with friends in real time.";
+
+export const metadata: Metadata = {
+    title: "Rooms",
+    description: roomsDescription,
+    alternates: { canonical: "/rooms" },
+    openGraph: {
+        type: "website",
+        title: "FocusRoom — Rooms",
+        description: roomsDescription,
+        url: "/rooms",
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "FocusRoom — Rooms",
+        description: roomsDescription,
+    },
+};
 
 type RoomRow = {
     id: number;
@@ -18,7 +39,6 @@ export default async function RoomsPage() {
     let existingRoom: RoomRow | null = null;
     if (session) {
         const existing = getRoomByHostId(Number(session.user.id));
-        console.log(existing);
         if (existing) {
             existingRoom = existing as RoomRow;
         }

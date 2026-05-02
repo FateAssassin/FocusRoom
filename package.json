@@ -17,6 +17,7 @@
     "bcrypt": "^6.0.0",
     "better-sqlite3": "^12.8.0",
     "bootstrap-icons": "^1.13.1",
+    "isomorphic-dompurify": "^3.11.0",
     "jsonwebtoken": "^9.0.3",
     "next": "16.2.1",
     "next-auth": "^4.24.13",

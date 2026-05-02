@@ -11,7 +11,7 @@ export interface User {
 
 export function getUserById(id: number): User | undefined {
     const user = db.prepare(`
-        SELECT id, name, email, description, created_at, profile_picture_link
+        SELECT id, name, description, created_at, profile_picture_link
         FROM users
         WHERE id = ?
     `).get(id) as User | undefined;

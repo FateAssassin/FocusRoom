@@ -1,8 +1,30 @@
+import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/lib/auth/auth-options";
 import { getRoomById } from "@/app/lib/db/rooms";
 import RoomView from "./room-view";
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+    const { id } = await params;
+    const roomId = Number(id);
+    if (!Number.isFinite(roomId)) {
+        return { title: "Room not found", robots: { index: false, follow: false } };
+    }
+    const room = getRoomById(roomId);
+    if (!room) {
+        return { title: "Room not found", robots: { index: false, follow: false } };
+    }
+    const description = room.description?.trim()
+        ? room.description.slice(0, 200)
+        : `Join the "${room.name}" focus session on FocusRoom.`;
+    return {
+        title: room.name,
+        description,
+        robots: { index: false, follow: false },
+        alternates: { canonical: `/room/${room.id}` },
+    };
+}
 
 type RoomRow = {
     id: number;

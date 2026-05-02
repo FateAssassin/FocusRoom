@@ -30,6 +30,7 @@ const getRoomStmt = db.prepare(
 );
 
 const DEFAULT_FOCUS_MIN = 25;
+const CHAT_COOLDOWN_MS = 1500;
 
 const rooms = new Map();
 
@@ -191,13 +192,21 @@ app.prepare().then(() => {
     socket.on("chat:send", (raw) => {
       const roomId = socket.data.roomId;
       if (!roomId) return;
+      const now = Date.now();
+      const last = socket.data.lastChatAt || 0;
+      const remaining = CHAT_COOLDOWN_MS - (now - last);
+      if (remaining > 0) {
+        socket.emit("chat:cooldown", { remainingMs: remaining });
+        return;
+      }
       const text = String((raw && raw.text) || "").trim().slice(0, 500);
       if (!text) return;
+      socket.data.lastChatAt = now;
       io.to(`room:${roomId}`).emit("chat:message", {
         fromId: socket.data.userId,
         fromName: socket.data.userName,
         text,
-        ts: Date.now(),
+        ts: now,
       });
     });
 

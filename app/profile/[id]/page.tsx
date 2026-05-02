@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { getUserById } from "@/app/lib/db/users";
 import { authOptions } from "@/app/lib/auth/auth-options";
 import { getServerSession } from "next-auth/next";
@@ -5,6 +6,42 @@ import Link from "next/link";
 import { getFriendshipStatus } from "@/app/lib/db/friends";
 import { getRoomByHostId } from "@/app/lib/db/rooms";
 import FriendButton from "./friend-button";
+
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+    const param = await params;
+    const user = getUserById(Number(param.id));
+    if (!user) {
+        return {
+            title: "User not found",
+            robots: { index: false, follow: false },
+        };
+    }
+    const description = user.description?.trim()
+        ? user.description.slice(0, 200)
+        : `${user.name}'s profile on FocusRoom — see their hosted room and study together.`;
+    const url = `/profile/${user.id}`;
+    const images = user.profile_picture_link ? [{ url: user.profile_picture_link }] : undefined;
+
+    return {
+        title: user.name,
+        description,
+        alternates: { canonical: url },
+        openGraph: {
+            type: "profile",
+            title: `${user.name} · FocusRoom`,
+            description,
+            url,
+            siteName: "FocusRoom",
+            ...(images ? { images } : {}),
+        },
+        twitter: {
+            card: images ? "summary" : "summary_large_image",
+            title: `${user.name} · FocusRoom`,
+            description,
+            ...(images ? { images: [user.profile_picture_link as string] } : {}),
+        },
+    };
+}
 
 
 export default async function Page({ params }: { params: { id: string } }) {

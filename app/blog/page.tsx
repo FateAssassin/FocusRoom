@@ -1,9 +1,30 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../lib/auth/auth-options";
 import { isAdmin } from "../lib/db/admins";
 import { getAllBlogs } from "../lib/db/blogs";
+
+const blogDescription =
+  "News, focus tips, and product updates from the FocusRoom team — guides on Pomodoro, deep work, and studying with friends.";
+
+export const metadata: Metadata = {
+  title: "Blog",
+  description: blogDescription,
+  alternates: { canonical: "/blog" },
+  openGraph: {
+    type: "website",
+    title: "FocusRoom Blog",
+    description: blogDescription,
+    url: "/blog",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FocusRoom Blog",
+    description: blogDescription,
+  },
+};
 
 function stripHtml(html: string): string {
     return html

@@ -28,10 +28,9 @@ export default function EditDescription({ description, userId }: { description: 
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ userId: Number(userId), description: newDescription }),
+                body: JSON.stringify({ description: newDescription }),
             });
             const data = await response.json().catch(() => null) as { error?: string; success?: boolean } | null;
-            console.log(data)
             if (!response.ok || !data?.success) {
                 setErrorMessage(data?.error ?? "Failed to update description. Please try again.");
                 return;

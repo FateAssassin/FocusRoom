@@ -1,10 +1,30 @@
-"use client"
-
+import type { Metadata } from "next";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { getServerSession } from "next-auth";
+import { authOptions } from "./lib/auth/auth-options";
 
-export default function Home() {
-  const { data: session } = useSession();
+const homeDescription =
+  "Join collaborative focus sessions with friends, colleagues, or study partners. Stay accountable with shared Pomodoro timers and real-time presence tracking.";
+
+export const metadata: Metadata = {
+  title: { absolute: "FocusRoom — Focus Together, Achieve More" },
+  description: homeDescription,
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "FocusRoom — Focus Together, Achieve More",
+    description: homeDescription,
+    url: "/",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FocusRoom — Focus Together, Achieve More",
+    description: homeDescription,
+  },
+};
+
+export default async function Home() {
+  const session = await getServerSession(authOptions);
   const cards = [
     {
       icon: "clock",
