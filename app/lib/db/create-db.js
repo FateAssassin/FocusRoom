@@ -1,7 +1,7 @@
 import Database from "better-sqlite3";
 
 // create / open DB
-const db = new Database("../../../focusroom.db");
+const db = new Database("/app/data/focusroom.db");
 
 // initialize tables
 db.exec(`
