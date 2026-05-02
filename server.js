@@ -24,7 +24,7 @@ if (!process.env.NEXTAUTH_SECRET) {
 const app = next({ dev, turbopack: true });
 const handle = app.getRequestHandler();
 
-const db = new Database(path.resolve("focusroom.db"));
+const db = new Database(path.resolve("app/data/focusroom.db"));
 const getRoomStmt = db.prepare(
   "SELECT id, host_id, name, max_members FROM rooms WHERE id = ?",
 );
