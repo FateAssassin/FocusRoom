@@ -29,4 +29,4 @@ EXPOSE 3000
 
 # Initialise schema against the (possibly volume-mounted) data dir, then start the server.
 # create-db.js uses CREATE TABLE IF NOT EXISTS, so this is safe on every start.
-CMD ["sh", "-c", "node app/lib/db/create-db.js && pnpm start"]
+CMD ["sh", "-c", "mkdir -p /app/data /app/public/uploads/profile-pictures && node app/lib/db/create-db.js && pnpm start"]
