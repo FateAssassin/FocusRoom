@@ -21,14 +21,14 @@ COPY . .
 # Create data + uploads folders before build (db.ts opens the DB at module load)
 RUN mkdir -p /app/data /app/public/uploads/profile-pictures
 
+# create DB automatically
+RUN node app/lib/db/create-db.js || true
+
 # Build Next.js
 RUN pnpm build
 
 # Expose port
 EXPOSE 3000
-
-# create DB automatically
-RUN node app/lib/db/create-db.js || true
 
 # Run the app
 CMD ["pnpm", "start"]
