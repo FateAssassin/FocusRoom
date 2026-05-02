@@ -21,14 +21,12 @@ COPY . .
 # Create data + uploads folders before build (db.ts opens the DB at module load)
 RUN mkdir -p /app/data /app/public/uploads/profile-pictures
 
-# create DB automatically
-RUN node app/lib/db/create-db.js || true
-
-# Build Next.js
+# Build Next.js (db.ts opens an empty DB; tables are created at container start below)
 RUN pnpm build
 
 # Expose port
 EXPOSE 3000
 
-# Run the app
-CMD ["pnpm", "start"]
+# Initialise schema against the (possibly volume-mounted) data dir, then start the server.
+# create-db.js uses CREATE TABLE IF NOT EXISTS, so this is safe on every start.
+CMD ["sh", "-c", "node app/lib/db/create-db.js && pnpm start"]
