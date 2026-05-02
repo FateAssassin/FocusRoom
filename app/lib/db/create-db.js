@@ -2,9 +2,9 @@ import Database from "better-sqlite3";
 import path from "path";
 import fs from "fs";
 
-const dataDir = path.join(process.cwd(), "app", "data");
-fs.mkdirSync(dataDir, { recursive: true });
-const db = new Database(path.join(dataDir, "focusroom.db"));
+const dbPath = process.env.DB_PATH ?? path.join(process.cwd(), "app", "data", "focusroom.db");
+fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+const db = new Database(dbPath);
 
 // initialize tables
 db.exec(`
