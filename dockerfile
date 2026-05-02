@@ -27,5 +27,8 @@ RUN pnpm build
 # Expose port
 EXPOSE 3000
 
-# Start your custom server
+# create DB automatically
+RUN node app/lib/db/create-db.js || true
+
+# Run the app
 CMD ["pnpm", "start"]
