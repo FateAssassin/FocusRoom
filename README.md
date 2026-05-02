@@ -1,6 +1,6 @@
 # FocusRoom
 
-A collaborative focus / Pomodoro web app. Sign up, create a room, and run a synced Pomodoro timer with friends in real time. Server-side timer authority, host-only controls, in-room chat, and a friend system are all wired up.
+A collaborative focus / Pomodoro web app. Sign up, add friends, start a room, and run a synced Pomodoro timer with chat in real time. Admins can publish blog posts. Server-side timer authority, host-only controls, and a friend system are all wired up.
 
 > **Status:** test build. The core room loop works end-to-end, but room state is held in memory on the Node process — restarting the server clears active sessions. See [Known rough edges](#known-rough-edges).
 
@@ -16,20 +16,27 @@ A collaborative focus / Pomodoro web app. Sign up, create a room, and run a sync
   - In-room chat
   - Live member list
   - Server is the timer source of truth
+- Blog system (admin-authored):
+  - Tiptap rich-text editor
+  - HTML sanitized with DOMPurify before render
+  - Per-post `BlogPosting` JSON-LD schema for SEO
+- SEO basics: `metadataBase`, OG / Twitter cards, root OG image, `robots.ts`, dynamic `sitemap.ts`
 
 ## Stack
 
-| Layer       | Tech                                       |
-| ----------- | ------------------------------------------ |
-| Framework   | Next.js **16.2.1** (App Router, Turbopack) |
-| UI          | React **19.2.4**, Tailwind CSS **v4**      |
-| Language    | TypeScript                                 |
-| Auth        | NextAuth v4 (Credentials + JWT)            |
-| Database    | better-sqlite3 (local `focusroom.db`)      |
-| Real-time   | socket.io 4 on a custom Node server        |
-| Hashing     | bcrypt                                     |
-| Icons       | bootstrap-icons                            |
-| Package mgr | pnpm                                       |
+| Layer       | Tech                                                      |
+| ----------- | --------------------------------------------------------- |
+| Framework   | Next.js **16.2.1** (App Router, Turbopack)                |
+| UI          | React **19.2.4**, Tailwind CSS **v4**                     |
+| Language    | TypeScript                                                |
+| Auth        | NextAuth v4 (Credentials + JWT)                           |
+| Database    | better-sqlite3 (local `focusroom.db`)                     |
+| Real-time   | socket.io 4 on a custom Node server                       |
+| Editor      | Tiptap 3 (`@tiptap/react`, `starter-kit`)                 |
+| Sanitizer   | isomorphic-dompurify                                      |
+| Hashing     | bcrypt                                                    |
+| Icons       | bootstrap-icons                                           |
+| Package mgr | pnpm                                                      |
 
 ## Getting started
 
@@ -49,7 +56,7 @@ NEXTAUTH_SECRET=your_nextauth_secret
 JWT_SECRET=your_jwt_secret
 ```
 
-`NEXTAUTH_SECRET` is required — the socket.io handshake decodes the NextAuth session cookie with it. Generate one with `openssl rand -hex 32`.
+`NEXTAUTH_SECRET` is required — the socket.io handshake decodes the NextAuth session cookie with it. Generate one with `openssl rand -hex 32`. In production, set `NEXTAUTH_URL` to your real domain — `metadataBase`, `robots.ts`, `sitemap.ts`, and the blog JSON-LD all read from it.
 
 ### 3. Initialize the database
 
@@ -99,33 +106,41 @@ next.config.ts               next config (allowedDevOrigins for LAN dev)
 next-auth.d.ts               session/JWT type extensions
 
 app/
-  layout.tsx                 root layout, wraps app in NextAuth SessionProvider
+  layout.tsx                 root layout, metadata, NextAuth SessionProvider
   page.tsx                   landing page
   not-found.tsx              site-wide 404
-  globals.css                Tailwind v4 theme + .button-main, .button-secondary, .card
+  globals.css                Tailwind v4 theme + .button-main, .button-secondary, .card, .blog-prose
+  icon.png                   favicon / app icon
+  opengraph-image.jpg        default OG / Twitter card image
+  robots.ts                  generated robots.txt (allowlist + sitemap pointer)
+  sitemap.ts                 dynamic sitemap (landing, blog, every blog post, rooms)
 
   api/
     auth/[...nextauth]/      NextAuth handler
     auth/register/           POST — sign up (rate-limited, bcrypt)
-    createroom/              POST — create a room (used by an older client path)
     friends/incoming-count/  GET — count of pending incoming friend requests
     profile/getprofilebyid/  GET — user lookup
     profile/updateDescription/ POST
     profile/updatepicture/   POST — multipart upload to public/uploads/profile-pictures/
 
   components/
-    navbar.tsx, alert.tsx, create-room.tsx
+    navbar.tsx, footer.tsx, alert.tsx
+    create-room.tsx
+    blog-editor.tsx          Tiptap editor wrapper
     profile/changeProfilePicture.tsx, profile/editDescription.tsx
 
   lib/
     auth/auth-options.ts     NextAuthOptions (Credentials + jwt/session callbacks)
-    auth/auth.ts             jsonwebtoken sign/verify helpers
     db/db.ts                 better-sqlite3 singleton ("server-only")
     db/create-db.js          one-off table bootstrap script
     db/users.ts              user queries
     db/rooms.ts              room CRUD with RoomMutationResult error handling
     db/friends.ts            friend system queries
+    db/blogs.ts              blog CRUD with BlogMutationResult error handling
+    db/admins.ts             isAdmin(userId) lookup
     actions.ts               'use server' actions (rooms, friends, join-by-code)
+    blog-actions.ts          'use server' actions (create/update/delete blog, admin-gated)
+    sanitize-blog.ts         DOMPurify wrapper for blog HTML
     rate-limit.ts            in-memory token bucket (registration, join-by-code)
 
   signin/, signup/           auth pages
@@ -135,6 +150,11 @@ app/
   rooms/page.tsx             public room browser
   rooms/create/              create-room page + form + existing-room redirect + error boundary
   room/[id]/                 live room view (server component + socket.io client)
+  blog/page.tsx              blog index (all posts)
+  blog/create/page.tsx       new post (admin-only)
+  blog/[id]/page.tsx         post view, with BlogPosting JSON-LD
+  blog/[id]/edit/page.tsx    edit post (admin-only)
+  blog/[id]/delete-button.tsx, blog/[id]/not-found.tsx
 
 public/
   uploads/profile-pictures/  gitignored, created on first upload
@@ -152,6 +172,18 @@ Path alias: `@/*` → project root (see `tsconfig.json`). Import as `@/app/lib/d
 5. Only the host (the user whose `id` equals `rooms.host_id`) can emit `timer:set`, `timer:start`, `timer:pause`, `timer:reset`, and `user:kick`. The server enforces this regardless of what the client sends.
 6. The server ticks running timers every second and broadcasts state to the room.
 
+## How blogs work
+
+- Posts live in the `blogs` table; CRUD lives in `app/lib/db/blogs.ts`.
+- Authoring uses Tiptap's `StarterKit` via `app/components/blog-editor.tsx`.
+- Submitted HTML is run through `sanitizeBlogHtml` (DOMPurify) before render — never trust the editor's HTML.
+- `app/lib/blog-actions.ts` server actions check `isAdmin(session.user.id)` before mutating. Non-admins get a generic error.
+- There is **no UI to grant admin** — insert directly into the `admins` table:
+  ```bash
+  sqlite3 focusroom.db "INSERT INTO admins (user_id) VALUES (1);"
+  ```
+- Each post page emits a `BlogPosting` JSON-LD script with `headline`, `datePublished`, `dateModified`, `author`, and a canonical URL built from `NEXTAUTH_URL`. Validate with Google's [Rich Results Test](https://search.google.com/test/rich-results).
+
 ## Auth
 
 - NextAuth v4, Credentials provider, JWT session strategy.
@@ -165,22 +197,32 @@ Path alias: `@/*` → project root (see `tsconfig.json`). Import as `@/app/lib/d
 
 Tables defined in `app/lib/db/create-db.js`:
 
-| Table              | Notes                                                        |
-| ------------------ | ------------------------------------------------------------ |
-| `users`            | `name` and `email` are unique; password is a bcrypt hash     |
-| `profile_pictures` | history of uploaded pictures (the live link is on `users`)   |
-| `admins`           | reserved (no UI yet)                                          |
-| `friends`          | `(user_id, friend_id)` unique, `accepted` flag for pending   |
+| Table              | Notes                                                                            |
+| ------------------ | -------------------------------------------------------------------------------- |
+| `users`            | `name` and `email` are unique; password is a bcrypt hash                         |
+| `profile_pictures` | history of uploaded pictures (the live link is denormalized on `users`)          |
+| `admins`           | `user_id` unique; gates blog create/edit/delete                                  |
+| `friends`          | `(user_id, friend_id)` unique, `accepted` flag for pending                       |
 | `rooms`            | `UNIQUE(host_id, invite_code)`; "one room per host" is enforced at the API layer |
+| `blogs`            | `author_id` foreign key to `users`; `created_at` / `updated_at` auto-managed     |
+
+## SEO
+
+- `app/layout.tsx` sets a full root `Metadata` block: `metadataBase` (from `NEXTAUTH_URL`), title template, OG, Twitter card, robots config, icons.
+- `app/opengraph-image.jpg` is auto-picked up by Next as the default OG image.
+- `app/robots.ts` allows everything except `/api/`, `/blog/new`, `/blog/*/edit`, `/profile`, `/friends`, `/rooms/create`, `/room/`.
+- `app/sitemap.ts` revalidates every hour and includes `/`, `/blog`, every `/blog/{id}`, and `/rooms`.
+- Blog post pages emit `BlogPosting` JSON-LD inline.
 
 ## Known rough edges
 
 These are intentional in the test build — leave them alone unless asked.
 
-- `POST /api/createroom` trusts `hostId` from the request body in addition to the session.
 - Room state is held in-memory per Node process. Restarting clears all live sessions.
-- Vercel deployment does not work — a custom Node server is required.
+- Vercel-style serverless deployment does not work — the custom Node server is required.
 - The `create-db.js` script's relative DB path only resolves when run from `app/lib/db/`.
+- No UI to grant admin status — must be inserted into `admins` directly.
+- Password minimum is 8 chars with no complexity requirements.
 
 ## Roadmap
 
