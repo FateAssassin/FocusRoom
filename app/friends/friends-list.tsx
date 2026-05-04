@@ -267,7 +267,7 @@ export default function FriendsList({
                                     <div className="flex gap-2 mt-auto">
                                         {canJoin && f.room ? (
                                             <Link
-                                                href={`/rooms/${f.room.id}`}
+                                                href={`/room/${f.room.id}`}
                                                 className="button-main text-sm flex-1 inline-flex items-center justify-center"
                                             >
                                                 <i className="bi bi-box-arrow-in-right mr-2"></i>
