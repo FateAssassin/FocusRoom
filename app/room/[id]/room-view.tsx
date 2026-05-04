@@ -425,7 +425,7 @@ export default function RoomView({ room, me }: { room: RoomProps; me: MeProps })
                                     key={m.socketId}
                                     className="flex items-center gap-2 text-sm"
                                 >
-                                    <a href={`/profile/${m.userId}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 w-full ">
+                                    <div className="flex items-center gap-2 w-full ">
                                         <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-600 overflow-hidden shrink-0">
                                             {m.pic ? (
                                                 // eslint-disable-next-line @next/next/no-img-element
@@ -434,7 +434,7 @@ export default function RoomView({ room, me }: { room: RoomProps; me: MeProps })
                                                 m.name.slice(0, 1).toUpperCase()
                                             )}
                                         </div>
-                                        <span className="truncate flex-1">{m.name}</span>
+                                        <a href={`/profile/${m.userId}`} target="_blank" rel="noopener noreferrer" className="truncate flex-1">{m.name}</a>
                                         {m.userId === room.hostId ? (
                                             <i
                                                 className="bi bi-star-fill text-xs"
@@ -451,7 +451,7 @@ export default function RoomView({ room, me }: { room: RoomProps; me: MeProps })
                                                 <i className="bi bi-x-lg"></i>
                                             </button>
                                         ) : null}
-                                    </a>
+                                    </div>
                                 </li>
                             ))}
                             {members.length === 0 ? (
