@@ -7,7 +7,7 @@ export async function POST(request: Request) {
     if (!session || !session.user) {
         return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
     }
-    const userId = session.user.id;
+    const userId = Number(session.user.id);
     try {
         const { description } = await request.json() as { description: string };   
         if (typeof userId !== "number" || typeof description !== "string") {

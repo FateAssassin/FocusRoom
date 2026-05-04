@@ -4,6 +4,7 @@ const { loadEnvConfig } = require("@next/env");
 
 loadEnvConfig(process.cwd());
 
+const fs = require("fs");
 const next = require("next");
 const { Server } = require("socket.io");
 const { getToken, decode } = require("next-auth/jwt");
@@ -24,7 +25,10 @@ if (!process.env.NEXTAUTH_SECRET) {
 const app = next({ dev, turbopack: true });
 const handle = app.getRequestHandler();
 
-const db = new Database(process.env.DB_PATH || "/app/data/focusroom.db");
+const dbPath =
+  process.env.DB_PATH || path.join(process.cwd(), "app/data/focusroom.db");
+fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+const db = new Database(dbPath);
 const getRoomStmt = db.prepare(
   "SELECT id, host_id, name, max_members FROM rooms WHERE id = ?",
 );
