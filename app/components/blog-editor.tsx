@@ -2,6 +2,7 @@
 
 import { useEditor, EditorContent, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import Link from "@tiptap/extension-link";
 import { useEffect } from "react";
 
 type BlogEditorProps = {
@@ -14,6 +15,15 @@ export default function BlogEditor({ initialContent = "", onChange }: BlogEditor
         extensions: [
             StarterKit.configure({
                 heading: { levels: [1, 2, 3] },
+            }),
+            Link.configure({
+                openOnClick: false,
+                autolink: true,
+                linkOnPaste: true,
+                HTMLAttributes: {
+                    target: "_blank",
+                    rel: "noopener noreferrer nofollow",
+                },
             }),
         ],
         content: initialContent,
@@ -149,6 +159,12 @@ function Toolbar({ editor }: { editor: Editor }) {
                 onClick={() => editor.chain().focus().setHorizontalRule().run()}
                 active={false}
             />
+            <ToolbarButton
+                title={editor.isActive("link") ? "Edit link (clear to remove)" : "Add link"}
+                icon="bi-link-45deg"
+                onClick={() => promptForLink(editor)}
+                active={editor.isActive("link")}
+            />
 
             <Divider />
 
@@ -209,4 +225,17 @@ function ToolbarButton({ title, onClick, active, disabled, icon, label }: Toolba
 
 function Divider() {
     return <span className="mx-1 h-6 w-px bg-gray-300" aria-hidden />;
+}
+
+function promptForLink(editor: Editor) {
+    const previous = (editor.getAttributes("link").href as string | undefined) ?? "";
+    const input = window.prompt("Link URL (leave empty to remove):", previous || "https://");
+    if (input === null) return;
+    const url = input.trim();
+    if (url === "" || url === "https://") {
+        editor.chain().focus().extendMarkRange("link").unsetLink().run();
+        return;
+    }
+    const safe = /^(https?:\/\/|mailto:|\/)/i.test(url) ? url : `https://${url}`;
+    editor.chain().focus().extendMarkRange("link").setLink({ href: safe }).run();
 }
