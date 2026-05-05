@@ -1,5 +1,6 @@
 import { authOptions } from "@/app/lib/auth/auth-options";
 import { getUserById, updateUserProfilePicture } from "@/app/lib/db/users";
+import { getProfilePicturesDir, PROFILE_PICTURE_URL_PREFIX } from "@/app/lib/uploads";
 import { mkdir, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { getServerSession } from "next-auth/next";
@@ -76,23 +77,26 @@ export async function POST(req: Request) {
         );
     }
 
-    const uploadsDir = path.join(process.cwd(), "public", "uploads", "profile-pictures");
+    const uploadsDir = getProfilePicturesDir();
     await mkdir(uploadsDir, { recursive: true });
 
     const extension = ALLOWED_IMAGE_TYPES.get(sniffedMime);
     const filename = `user-${userId}-${Date.now()}.${extension}`;
     const diskPath = path.join(uploadsDir, filename);
-    const publicPath = `/uploads/profile-pictures/${filename}`;
+    const publicPath = `${PROFILE_PICTURE_URL_PREFIX}${filename}`;
 
     await writeFile(diskPath, buffer);
 
     const previousPicture = user.profile_picture_link;
     updateUserProfilePicture(userId, publicPath);
 
-    if (previousPicture?.startsWith("/uploads/profile-pictures/")) {
-        const previousFilePath = path.join(process.cwd(), "public", previousPicture.replace(/^\/+/, "").replace(/\//g, path.sep));
-        if (previousFilePath !== diskPath) {
-            await unlink(previousFilePath).catch(() => undefined);
+    if (previousPicture?.startsWith(PROFILE_PICTURE_URL_PREFIX)) {
+        const previousFilename = previousPicture.slice(PROFILE_PICTURE_URL_PREFIX.length);
+        if (previousFilename && !previousFilename.includes("/") && !previousFilename.includes("\\")) {
+            const previousFilePath = path.join(uploadsDir, previousFilename);
+            if (previousFilePath !== diskPath) {
+                await unlink(previousFilePath).catch(() => undefined);
+            }
         }
     }
 

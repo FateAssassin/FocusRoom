@@ -121,7 +121,8 @@ app/
     friends/incoming-count/  GET — count of pending incoming friend requests
     profile/getprofilebyid/  GET — user lookup
     profile/updateDescription/ POST
-    profile/updatepicture/   POST — multipart upload to public/uploads/profile-pictures/
+    profile/updatepicture/   POST — multipart upload to app/data/uploads/profile-pictures/
+    uploads/profile-pictures/[filename]/ GET — streams the picture from disk
 
   components/
     navbar.tsx, footer.tsx, alert.tsx
@@ -156,9 +157,9 @@ app/
   blog/[id]/edit/page.tsx    edit post (admin-only)
   blog/[id]/delete-button.tsx, blog/[id]/not-found.tsx
 
-public/
-  uploads/profile-pictures/  gitignored, created on first upload
-focusroom.db                 SQLite database (gitignored)
+app/data/
+  focusroom.db                 SQLite database (gitignored)
+  uploads/profile-pictures/    gitignored, created on first upload; served via /api/uploads/profile-pictures/[filename]
 ```
 
 Path alias: `@/*` → project root (see `tsconfig.json`). Import as `@/app/lib/db/db`.

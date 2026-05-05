@@ -40,8 +40,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# profile pictures
-/public/uploads/profile-pictures/*
+# uploads (live next to the SQLite DB on the volume in production)
+/app/data/uploads/
 
 # database
 *.db
