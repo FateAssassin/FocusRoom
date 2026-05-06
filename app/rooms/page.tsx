@@ -45,8 +45,9 @@ export default async function RoomsPage() {
     }
             
     const all = getAllRooms() as RoomRow[];
-    const publicRooms: RoomSummary[] = all
-        .filter((r) => r.publicity !== "private")
+    const ownRoomId = existingRoom?.id;
+    const visibleRooms: RoomSummary[] = all
+        .filter((r) => r.publicity !== "private" || r.id === ownRoomId)
         .map((r) => ({
             id: r.id,
             name: r.name,
@@ -70,7 +71,7 @@ export default async function RoomsPage() {
                     </p>
                 </header>
 
-                <RoomsBrowser rooms={publicRooms} existingRoom={existingRoom} createHref={createHref} />
+                <RoomsBrowser rooms={visibleRooms} existingRoom={existingRoom} createHref={createHref} />
             </div>
         </div>
     );
